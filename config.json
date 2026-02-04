@@ -1,0 +1,245 @@
+{
+    "transformations": [
+        {
+            "id": "blur",
+            "sigma_min": 2,
+            "sigma_max": 10,
+            "active": true
+        },
+        {
+            "id": "noise",
+            "scale": 30,
+            "per_channel": true,
+            "active": true
+        },
+        {
+            "id": "jigsaw",
+            "nb_rows_min": 2,
+            "nb_rows_max": 5,
+            "nb_cols_min": 2,
+            "nb_cols_max": 5,
+            "max_steps_min": 2,
+            "max_steps_max": 5,
+            "active": true
+        },
+        {
+            "id": "kmeanscolorquantization",
+            "n_colors_min": 4,
+            "n_colors_max": 8,
+            "active": true
+        },
+        {
+            "id": "saltandpepper",
+            "p_min": 0.1,
+            "p_max": 0.3,
+            "per_channel": false,
+            "active": true
+        },
+        {
+            "id": "coarsedropout",
+            "p_min": 0.1,
+            "p_max": 0.3,
+            "size_percent_min": 0.02,
+            "size_percent_max": 0.1,
+            "per_channel": false,
+            "active": true
+        },
+        {
+            "id": "multiplyhue",
+            "hue_min": 0.1,
+            "hue_max": 2,
+            "active": true
+        },
+        {
+            "id": "affine",
+            "scale_min": 0.8,
+            "scale_max": 1.2,
+            "rotate_min": -45,
+            "rotate_max": 45,
+            "shear_min": -16,
+            "shear_max": 16,
+            "active": true
+        }
+    ],
+    "datasets": [
+        {
+            "id": "aircraft",
+            "task": "classification",
+            "active": true
+        },
+        {
+            "id": "flowers102",
+            "task": "classification",
+            "active": true
+        },
+        {
+            "id": "cub2011",
+            "task": "classification",
+            "active": true
+        },
+        {
+            "id": "dogs",
+            "task": "classification",
+            "active": true
+        },
+        {
+            "id": "cars",
+            "task": "classification",
+            "active": true
+        },
+        {
+            "id": "pets",
+            "task": "classification",
+            "active": true
+        },
+        {
+            "id": "food101",
+            "task": "classification",
+            "active": true
+        },
+        {
+            "id": "retinamnist",
+            "task": "classification",
+            "active": false
+        },
+        {
+            "id": "chestmnist",
+            "task": "multilabel_classification",
+            "active": false
+        },
+        {
+            "id": "tissuemnist",
+            "task": "classification",
+            "active": false
+        },
+        {
+            "id": "eurosat",
+            "task": "classification",
+            "active": false
+        },
+        {
+            "id": "dtd",
+            "task": "classification",
+            "active": false
+        },
+        {
+            "id": "svhn",
+            "task": "classification",
+            "active": false
+        }
+    ],
+    "encoders": [
+        {
+            "id": "microsoft/resnet-50",
+            "type": "CNN",
+            "input_size": 224,
+            "params": "25.6M",
+            "active": true,
+            "output_size": 2048
+        },
+        {
+            "id": "google/efficientnet-b0",
+            "type": "CNN",
+            "input_size": 224,
+            "params": "5.3M",
+            "active": true,
+            "output_size": 1280
+        },
+        {
+            "id": "facebook/convnext-base-224",
+            "type": "CNN",
+            "input_size": 224,
+            "params": "89M",
+            "active": true,
+            "output_size": 1024
+        },
+        {
+            "id": "google/vit-base-patch16-224-in21k",
+            "type": "Transformer",
+            "input_size": 224,
+            "params": "86.4M",
+            "active": true,
+            "output_size": 768
+        },
+        {
+            "id": "facebook/deit-base-distilled-patch16-224",
+            "type": "Transformer",
+            "input_size": 224,
+            "params": "86M",
+            "active": true,
+            "output_size": 768
+        },
+        {
+            "id": "microsoft/swin-base-patch4-window7-224",
+            "type": "Transformer",
+            "input_size": 224,
+            "params": "87.8M",
+            "active": true,
+            "output_size": 1024 
+        },
+        {
+            "id": "custom/moco-v3-vit-b",
+            "type": "SSL",
+            "input_size": 224,
+            "params": "86.6M",
+            "active": true,
+            "output_size": 768 
+        },
+        {
+            "id": "custom/byol-resnet50",
+            "type": "SSL",
+            "input_size": 224,
+            "params": "25.6M",
+            "active": true,
+            "output_size": 2048
+        },
+        {
+            "id": "facebook/vit-mae-base",
+            "type": "SSL",
+            "input_size": 224,
+            "params": "112M",
+            "active": true,
+            "output_size": 768
+        },
+        {
+            "id": "facebook/dinov2-base",
+            "type": "SSL",
+            "input_size": 224,
+            "params": "86.6M",
+            "active": true,
+            "output_size": 768
+        },
+        {
+            "id": "custom/simclr-resnet-50",
+            "type": "SSL",
+            "input_size": 224,
+            "params": "24M",
+            "active": true,
+            "output_size": 2048
+        },
+        {
+            "id": "openai/clip-vit-base-patch32",
+            "type": "Foundation",
+            "input_size": 224,
+            "params": "88M",
+            "active": true,
+            "output_size": 768
+        },
+        {
+            "id": "Intel/dpt-swinv2-base-384",
+            "type": "Specialized",
+            "input_size": 384,
+            "params": "101M",
+            "active": true,
+            "output_size": 1024
+        },
+        {
+            "id": "custom/eva02_base_patch14_224.mim_in22k",
+            "type": "SSL",
+            "input_size": 224,
+            "params": "85.8",
+            "active": true,
+            "output_size": 768
+        }
+    ]
+}
