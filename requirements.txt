@@ -1,5 +1,6 @@
 transformers
 medmnist
-numpy<2
+numpy
 imgaug
 timm
+faiss-cpu
