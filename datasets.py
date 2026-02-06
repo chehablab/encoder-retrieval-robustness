@@ -204,6 +204,7 @@ class ClassificationDataset(Dataset):
             "cars": 196,
             "food101": 101,
             "pets": 37,
+            "gpr1200": 1200,
         }
         if self.dataset_name in labels_map:
             return labels_map[self.dataset_name]
