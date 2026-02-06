@@ -12,7 +12,32 @@ import medmnist
 import os, torch, random
 import subprocess
 
-
+class GPR1200(Dataset):
+    def __init__(self, root, download=True):
+        url = "https://visual-computing.com/files/GPR1200/GPR1200.zip"
+        super().__init__()
+        folder_name = os.path.join(root, "GPR1200")
+        if download and not os.path.exists(folder_name):
+            download_and_extract_archive(url, root, extract_root=folder_name)
+            
+        self.image_folder = os.path.join(folder_name, "images")
+        images = os.listdir(self.image_folder)
+        labels = self._extract_label(images)
+        
+        self.data = sorted(tuple(zip(images, labels)), key = lambda x : x[1])
+        
+    def _extract_label(self, images):
+        return [int(image.split("_")[0]) for image in images]
+            
+    def __len__(self):
+        return len(self.data)
+    
+    def __getitem__(self, index):
+        image_path = os.path.join(self.image_folder, self.data[index][0])
+        image = Image.open(image_path).convert('RGB')
+        label = self.data[index][1]
+        return image, label
+    
 class CUB2011Dataset(Dataset):
     """Custom CUB-200-2011 dataset"""
     url = "https://data.caltech.edu/records/65de6-vp158/files/CUB_200_2011.tgz"
@@ -77,6 +102,9 @@ class ClassificationDataset(Dataset):
 
         elif self.dataset_name == "cub2011":
             dataset = CUB2011Dataset(root=path, split=self.split, download=True)
+        
+        elif self.dataset_name =="gpr1200":
+            dataset = GPR1200(root=path, download=True)
 
         elif self.dataset_name == "dogs":
             url = "http://vision.stanford.edu/aditya86/ImageNetDogs/images.tar"
