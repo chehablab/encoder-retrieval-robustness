@@ -7,7 +7,7 @@ from tqdm import tqdm
 from typing import List
 from metrics import AltMetric
 from datasets import get_dataset
-from encoders import get_encoder
+from encoders import get_encoder, get_features
 from metrics import retrieval_mean_precision
 
 def exists(path):
@@ -23,6 +23,7 @@ def _is_already_evaluated(checkpoint_file_path, encoder_name, dataset_name):
 
 def retrieve(encoder_name: str, 
              dataset_name: str, 
+             target_dim: int,
              metrics: List = [AltMetric.RETRIEVAL_MEAN_PRECISION], 
              k_list: List[int] = [9],
              device: str = "cuda",
@@ -30,40 +31,44 @@ def retrieve(encoder_name: str,
              checkpoint_name: str = "results",
              verbose: bool = True):
 
-    encoder, img_processor = get_encoder(encoder_name, device=device)
-    dataset = get_dataset(dataset_name, None, img_processor)
-    
-    if verbose: print("Loading checkpoints....") 
+    if verbose: print("\nVerifying checkpoints....") 
     if not exists(checkpoint_folder): os.mkdir(checkpoint_folder)
         
     checkpoint_file = os.path.join(checkpoint_folder, checkpoint_name+".json")
     if _is_already_evaluated(checkpoint_file, encoder_name, dataset_name):
         print(f"{encoder_name} already evaluated on {dataset_name}. Skipping evaluation")
         return
+
+    encoder, img_processor = get_encoder(encoder_name, device=device)
+    dataset = get_dataset(dataset_name, None, img_processor)
     
         
-    if verbose: print(f"Getting image embeddings....")
-    embeddings = []
-    labels = []
+    if verbose: print(f"\nGetting image embeddings....")
+    num_samples = len(dataset)
+    embeddings = torch.empty((num_samples, target_dim), device=device)
+    labels = np.empty(num_samples, dtype=np.int32)
+
     encoder.eval()
-    with torch.no_grad():
-        for image, label in tqdm(dataset):
-            image = image.to(device)
-            embeddings = encoder(image)
-            embeddings.append(embeddings.cpu().numpy())
-            labels.append(label)
-    embeddings, labels = faiss.normalize_L2(np.vstack(embeddings)), np.vstack(labels) #l2 normalized
+    with torch.no_grad(): 
+        for i, (image, label) in enumerate(tqdm(dataset)):
+            image = image.to(device).unsqueeze(0)
+            emb = get_features(encoder, image, target_dim, device)
+            embeddings[i] = emb
+            labels[i] = label
+
+    embeddings = embeddings.cpu().numpy().astype("float32")
+    faiss.normalize_L2(embeddings)
             
-    if verbose: print("Evaluating embeddings....")
-    if AltMetric.MEAN_PRECISION in metrics:
+    if verbose: print("\nEvaluating embeddings....")
+    if AltMetric.RETRIEVAL_MEAN_PRECISION in metrics:
         mean_precision=[]
         for k in k_list:
-            mp = retrieval_mean_precision(embeddings.astype("float32"), labels, k)
-            mean_precision.append({f"{k}": mp})
+            mp = retrieval_mean_precision(embeddings, labels, k)
+            mean_precision.append({k: mp})
     else:
         mean_precision = []
         
-    if verbose: print("Saving checkpoint....")
+    if verbose: print("\nSaving checkpoint....")
     
     results = {
         'encoder': encoder_name,
