@@ -34,9 +34,8 @@ class GPR1200(Dataset):
     
     def __getitem__(self, index):
         image_path = os.path.join(self.image_folder, self.data[index][0])
-        image = Image.open(image_path).convert('RGB')
         label = self.data[index][1]
-        return image, label
+        return image_path, label
     
 class CUB2011Dataset(Dataset):
     """Custom CUB-200-2011 dataset"""
@@ -265,7 +264,11 @@ class ClassificationDataset(Dataset):
         
         elif self.dataset_name == "svhn":
             image, label = item[0], item[1]
-    
+            
+        elif self.dataset_name == "gpr1200":
+            image = Image.open(item[0]).convert("RGB")
+            label = item[1]
+            
         else:
             raise Exception(f"Dataset {self.dataset_name} is not supported!")
         
