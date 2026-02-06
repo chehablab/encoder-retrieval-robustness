@@ -126,6 +126,11 @@
             "id": "svhn",
             "task": "classification",
             "active": false
+        },
+        {
+            "id": "gpr1200",
+            "task": "retrieval",
+            "active": true
         }
     ],
     "encoders": [
