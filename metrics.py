@@ -18,7 +18,7 @@ class AltMetric(Enum):
   INITIAL_ALIGNMENT_CLUSTERS_METRIC = "initial_alignment_clusters"
   INITIAL_ALIGNMENT_CLUSTERS_AUC_METRIC = "initial_alignment_clusters_auc"
   INITIAL_ALIGNMENT_CLUSTERS_AUC_METRIC_WITH_DIM_REDUCTION = "initial_alignment_clusters_auc_with_dim_reduction"
-  MEAN_PRECISION = "mean_precision"
+  RETRIEVAL_MEAN_PRECISION = "retrieval_mean_precision"
 
 def _normalized_entropy(labels):
     labels = np.asarray(labels)
@@ -350,16 +350,12 @@ def augmentations_rank(embeddings, ids):
 
     return avg_ranks, min_ranks, max_ranks
 
-def mean_precision(embeddings, labels, k):
-    embeddings = embeddings.detach().cpu().numpy().astype("float32")
-    labels = labels.detach().cpu().numpy()
-    
-    faiss.normalize_L2(embeddings)
+def retrieval_mean_precision(embeddings, labels, k):
     
     index = faiss.IndexFlatIP(embeddings.shape[1])
     index.add(embeddings)
     
-    _, index = index.search(embeddings, k + 1)
+    _, neighbors = index.search(embeddings, k + 1)
     neighbors = neighbors[:, 1:]
     
     same_labels = labels[neighbors] == labels[:, None]
