@@ -21,15 +21,15 @@ def _is_already_evaluated(checkpoint_file_path, encoder_name, dataset_name):
                 return True
     return False
 
-def retrieve(encoder_name: str, 
-             dataset_name: str, 
-             target_dim: int,
-             metrics: List = [AltMetric.RETRIEVAL_MEAN_PRECISION], 
-             k_list: List[int] = [9],
-             device: str = "cuda",
-             checkpoint_folder: str = "./checkpoints", 
-             checkpoint_name: str = "results",
-             verbose: bool = True):
+def evaluate_retrieval(encoder_name: str, 
+                       dataset_name: str, 
+                       target_dim: int,
+                       metrics: List = [AltMetric.RETRIEVAL_MEAN_PRECISION], 
+                       k_list: List[int] = [9],
+                       device: str = "cuda",
+                       checkpoint_folder: str = "./checkpoints", 
+                       checkpoint_name: str = "results",
+                       verbose: bool = True):
 
     if verbose: print("\nVerifying checkpoints....") 
     if not exists(checkpoint_folder): os.mkdir(checkpoint_folder)
