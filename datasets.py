@@ -15,19 +15,15 @@ import subprocess
 class GPR1200(Dataset):
     def __init__(self, root, download=True):
         url = "https://visual-computing.com/files/GPR1200/GPR1200.zip"
-        super().__init__()
         folder_name = os.path.join(root, "GPR1200")
         if download and not os.path.exists(folder_name):
             download_and_extract_archive(url, root, extract_root=folder_name)
             
         self.image_folder = os.path.join(folder_name, "images")
         images = os.listdir(self.image_folder)
-        labels = self._extract_label(images)
+        labels = [int(image.split("_")[0]) for image in images]
         
         self.data = sorted(tuple(zip(images, labels)), key = lambda x : x[1])
-        
-    def _extract_label(self, images):
-        return [int(image.split("_")[0]) for image in images]
             
     def __len__(self):
         return len(self.data)
