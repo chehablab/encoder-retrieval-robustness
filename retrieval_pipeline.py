@@ -49,12 +49,11 @@ def evaluate_retrieval(encoder_name: str,
     labels = np.empty(num_samples, dtype=np.int32)
 
     encoder.eval()
-    with torch.no_grad(): 
-        for i, (image, label) in enumerate(tqdm(dataset)):
-            image = image.to(device).unsqueeze(0)
-            emb = get_features(encoder, image, target_dim, device)
-            embeddings[i] = emb
-            labels[i] = label
+    for i, (image, label) in enumerate(tqdm(dataset)):
+        image = image.to(device).unsqueeze(0)
+        emb = get_features(encoder, image, target_dim, device)
+        embeddings[i] = emb
+        labels[i] = label
 
     embeddings = embeddings.cpu().numpy().astype("float32")
     faiss.normalize_L2(embeddings)
