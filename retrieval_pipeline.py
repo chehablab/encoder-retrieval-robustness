@@ -23,7 +23,6 @@ def _is_already_evaluated(checkpoint_file_path, encoder_name, dataset_name):
 def evaluate_retrieval(encoder_name: str, 
                        dataset_name: str, 
                        target_dim: int,
-                       metrics: List = [AltMetric.RETRIEVAL_MEAN_PRECISION], 
                        k_list: List[int] = [9],
                        device: str = "cuda",
                        checkpoint_folder: str = "./checkpoints", 
@@ -40,7 +39,6 @@ def evaluate_retrieval(encoder_name: str,
 
     encoder, img_processor = get_encoder(encoder_name, device=device)
     dataset = get_dataset(dataset_name, None, img_processor)
-    
         
     if verbose: print(f"\nGetting image embeddings....")
     num_samples = len(dataset)
@@ -58,13 +56,10 @@ def evaluate_retrieval(encoder_name: str,
     faiss.normalize_L2(embeddings)
             
     if verbose: print("\nEvaluating embeddings....")
-    if AltMetric.RETRIEVAL_MEAN_PRECISION in metrics:
-        mean_precision=[]
-        for k in k_list:
-            mp = retrieval_mean_precision(embeddings, labels, k)
-            mean_precision.append({k: mp})
-    else:
-        mean_precision = []
+    mean_precision=[]
+    for k in k_list:
+        mp = retrieval_mean_precision(embeddings, labels, k)
+        mean_precision.append({k: mp})
         
     if verbose: print("\nSaving checkpoint....")
     
