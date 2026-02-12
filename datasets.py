@@ -13,25 +13,34 @@ import os, torch, random
 import subprocess
 
 class GPR1200(Dataset):
-    def __init__(self, root, download=True):
+    def __init__(self, processor, download=True):
         url = "https://visual-computing.com/files/GPR1200/GPR1200.zip"
+        root = os.environ.get('DATASET_PATH', 'data')
         folder_name = os.path.join(root, "GPR1200")
+        
         if download and not os.path.exists(folder_name):
-            download_and_extract_archive(url, root, extract_root=folder_name)
+            download_and_extract_archive(url, download_root=folder_name, extract_root=folder_name, remove_finished=True)
             
         self.image_folder = os.path.join(folder_name, "images")
         images = os.listdir(self.image_folder)
         labels = [int(image.split("_")[0]) for image in images]
         
         self.data = sorted(tuple(zip(images, labels)), key = lambda x : x[1])
+        self.processor = processor
             
     def __len__(self):
         return len(self.data)
     
     def __getitem__(self, index):
         image_path = os.path.join(self.image_folder, self.data[index][0])
+        image = Image.open(image_path).convert("RGB")
         label = self.data[index][1]
-        return image_path, label
+        
+        if self.processor:
+            image = self.processor(images=image, return_tensors="pt")
+            image = image['pixel_values'].squeeze()
+            
+        return image, label
     
 class CUB2011Dataset(Dataset):
     """Custom CUB-200-2011 dataset"""
@@ -97,9 +106,6 @@ class ClassificationDataset(Dataset):
 
         elif self.dataset_name == "cub2011":
             dataset = CUB2011Dataset(root=path, split=self.split, download=True)
-        
-        elif self.dataset_name =="gpr1200":
-            dataset = GPR1200(root=path, download=True)
 
         elif self.dataset_name == "dogs":
             url = "http://vision.stanford.edu/aditya86/ImageNetDogs/images.tar"
@@ -198,8 +204,7 @@ class ClassificationDataset(Dataset):
             "dogs": 120,
             "cars": 196,
             "food101": 101,
-            "pets": 37,
-            "gpr1200": 1200,
+            "pets": 37
         }
         if self.dataset_name in labels_map:
             return labels_map[self.dataset_name]
@@ -261,10 +266,6 @@ class ClassificationDataset(Dataset):
         elif self.dataset_name == "svhn":
             image, label = item[0], item[1]
             
-        elif self.dataset_name == "gpr1200":
-            image = Image.open(item[0]).convert("RGB")
-            label = item[1]
-            
         else:
             raise Exception(f"Dataset {self.dataset_name} is not supported!")
         
@@ -275,15 +276,17 @@ class ClassificationDataset(Dataset):
         return image, label
     
 def get_dataset(dataset_name, split, processor):
+    if dataset_name == "gpr1200":
+        return GPR1200(processor=processor, download=True)
     return ClassificationDataset(dataset_name, split, processor)
 
 def _mock_processor(images, return_tensors):
     images = ToTensor()(images)
     return {'pixel_values': images.unsqueeze(0)}
 
-def _test_dataset(dataset_name, dataset_task):
+def _test_dataset(dataset_name):
     image = Image.new('RGB', (224, 224), color = 'red')
-    dataset = get_dataset(dataset_name, dataset_task, 'train', _mock_processor)
+    dataset = get_dataset(dataset_name, 'train', _mock_processor)
     print(f"Dataset size: {len(dataset)}")
     for i in range(3):
         image, label = dataset[i]
