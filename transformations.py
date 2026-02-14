@@ -140,7 +140,7 @@ def _test_transformations(save = False, save_path = None):
         if save:
             transformed_image = np.array(transformed_image) *255
             img = Image.fromarray(transformed_image.astype(np.uint8), "RGB")
-            img.save(os.path.join(save_path, f"luna_{transformation["id"]}.jpg"))
+            img.save(os.path.join(save_path, f"luna_{transformation['id']}.jpg"))
     return transformed_images
 
 
