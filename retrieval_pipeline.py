@@ -84,7 +84,6 @@ def evaluate_retrieval(encoder_name: str,
         embeddings.append(batch_emb)
     embeddings = torch.cat(embeddings, dim=0)
     embeddings = embeddings.cpu().numpy()
-    faiss.normalize_L2(embeddings)
             
     if verbose: print("\nEvaluating embeddings....")
     mean_precision=[]

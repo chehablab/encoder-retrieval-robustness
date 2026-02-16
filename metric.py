@@ -1,6 +1,7 @@
 import faiss
 
 def retrieval_mean_precision(embeddings, labels, k):
+    faiss.normalize_L2(embeddings)
     index = faiss.IndexFlatIP(embeddings.shape[1])
     index.add(embeddings)
     _, neighbors = index.search(embeddings, k + 1)
