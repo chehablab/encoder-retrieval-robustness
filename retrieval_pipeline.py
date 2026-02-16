@@ -33,6 +33,7 @@ def evaluate_retrieval(encoder_name: str,
                        transformation,
                        transformation_name: str = None,
                        k_list: List[int] = [9],
+                       batch_size: int = 64,
                        device: str = "cuda",
                        checkpoint_folder: str = "./checkpoints", 
                        checkpoint_name: str = "results",
@@ -64,18 +65,25 @@ def evaluate_retrieval(encoder_name: str,
     
     if verbose: print(f"\nGetting image embeddings....")
 
-    embeddings = torch.empty((num_samples, target_dim), device=device)
-    labels = np.empty(num_samples, dtype=np.int32)
-
+    embeddings = []
+    labels = []
     encoder.eval()
-    for i, (image, label) in enumerate(tqdm(dataset)):
-        if transformation:
-            image = _apply_transform(image, transformation)
-        image = img_processor(image, return_tensors="pt")["pixel_values"].to(device)
-        emb = get_features(encoder, image, target_dim, device)
-        embeddings[i] = emb
-        labels[i] = label
+    for i in tqdm(range(0, num_samples, batch_size)):
+        batch_dataset = dataset[i:i+batch_size]
+        batch_images = []
+        batch_labels = []
+        for image, label in batch_dataset:
+            if transformation:
+                image = _apply_transform(image, transformation)
+            batch_images.append(image)
+            batch_labels.append(label)
+        batch_images = img_processor(batch_images, return_tensors="pt")["pixel_values"].to(device)
+        batch_emb = get_features(encoder, batch_images, target_dim, device)
+        embeddings.append(batch_emb)
+        labels.extend(batch_labels)
 
+    embeddings = torch.cat(embeddings, dim=0)
+    labels = np.array(labels)
     embeddings = embeddings.cpu().numpy().astype("float32")
     faiss.normalize_L2(embeddings)
             
