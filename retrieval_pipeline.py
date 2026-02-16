@@ -69,6 +69,7 @@ def evaluate_retrieval(encoder_name: str,
     for image, label in tqdm(dataset):
         images_paths.append(image)
         labels.append(label)
+    labels = np.array(labels)
     
     if verbose: print(f"\nGetting image embeddings....")
     embeddings = []
