@@ -275,7 +275,7 @@ class ClassificationDataset(Dataset):
             
         return image, label
     
-def get_dataset(dataset_name, split, processor):
+def get_dataset(dataset_name, split="train", processor=None):
     if dataset_name == "gpr1200":
         return GPR1200(processor=processor, download=True)
     return ClassificationDataset(dataset_name, split, processor)

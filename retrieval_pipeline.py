@@ -48,7 +48,7 @@ def evaluate_retrieval(encoder_name: str,
         return
 
     encoder, img_processor = get_encoder(encoder_name, device=device)
-    dataset = get_dataset(dataset_name, 'train', None)
+    dataset = get_dataset(dataset_name)
     num_samples = len(dataset)
 
     # if transformation:
