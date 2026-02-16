@@ -8,7 +8,7 @@ def retrieval_mean_precision(embeddings, labels, k):
     _, neighbors = index.search(embeddings, k + 1)
     neighbors = neighbors[:, 1:]
     same_labels = labels[neighbors] == labels[:, None]
-    return same_labels.mean().item()
+    return same_labels.mean()
 
 # Todo Develope
 def _test_retrieval_mean_precision():
