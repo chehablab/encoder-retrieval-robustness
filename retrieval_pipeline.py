@@ -50,17 +50,17 @@ def evaluate_retrieval(encoder_name: str,
     dataset = get_dataset(dataset_name, 'train', None)
     num_samples = len(dataset)
 
-    if transformation:
-        if verbose: print(f"\n Augmenting images....")
-        all_images = []
-        all_labels = []
+    # if transformation:
+    #     if verbose: print(f"\n Augmenting images....")
+    #     all_images = []
+    #     all_labels = []
 
-        for image, label in tqdm(dataset):
-            aug_img = _apply_transform(image, transformation)
-            all_images.append(aug_img)
-            all_labels.append(label)
-        del dataset
-        dataset = zip(all_images, all_labels)
+    #     for image, label in tqdm(dataset):
+    #         aug_img = _apply_transform(image, transformation)
+    #         all_images.append(aug_img)
+    #         all_labels.append(label)
+    #     del dataset
+    #     dataset = zip(all_images, all_labels)
     
     if verbose: print(f"\nGetting image embeddings....")
 
@@ -69,6 +69,8 @@ def evaluate_retrieval(encoder_name: str,
 
     encoder.eval()
     for i, (image, label) in enumerate(tqdm(dataset)):
+        if transformation:
+            image = _apply_transform(image, transformation)
         image = img_processor(image, return_tensors="pt")["pixel_values"].to(device)
         emb = get_features(encoder, image, target_dim, device)
         embeddings[i] = emb
