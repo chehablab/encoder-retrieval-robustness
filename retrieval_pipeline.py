@@ -62,28 +62,26 @@ def evaluate_retrieval(encoder_name: str,
     #         all_labels.append(label)
     #     del dataset
     #     dataset = zip(all_images, all_labels)
+
+    if verbose: print(f"\nExtracting data ...")
+    images_paths = []
+    labels = []
+    for image, label in tqdm(dataset):
+        images_paths.append(image)
+        labels.append(label)
     
     if verbose: print(f"\nGetting image embeddings....")
-
     embeddings = []
-    labels = []
     encoder.eval()
     for i in tqdm(range(0, num_samples, batch_size)):
-        batch_dataset = dataset[i:i+batch_size]
-        batch_images = []
-        batch_labels = []
-        for image, label in batch_dataset:
-            if transformation:
-                image = _apply_transform(image, transformation)
-            batch_images.append(image)
-            batch_labels.append(label)
+        batch_images = images_paths[i:i+batch_size]
+        batch_labels = labels[i:i+batch_size]
+        if transformation:
+            batch_images = [_apply_transform(image, transformation) for image in batch_images]
         batch_images = img_processor(batch_images, return_tensors="pt")["pixel_values"].to(device)
         batch_emb = get_features(encoder, batch_images, target_dim, device)
         embeddings.append(batch_emb)
-        labels.extend(batch_labels)
-
     embeddings = torch.cat(embeddings, dim=0)
-    labels = np.array(labels)
     embeddings = embeddings.cpu().numpy().astype("float32")
     faiss.normalize_L2(embeddings)
             
