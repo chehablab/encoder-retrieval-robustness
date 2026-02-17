@@ -26,17 +26,18 @@ def _is_already_evaluated(checkpoint_file_path, encoder_name, dataset_name):
                 return True
     return False
 
-def _apply_transform(batch_images, transformation):
-    imgs = [(np.asarray(img, dtype=np.float32) / 255.0) for img in batch_images]
-    augmented = (np.array(transformation(imgs)) * 255).astype(np.uint8)
-    return augmented
+def _apply_transform(image, transformation):
+    img = np.asarray(image)
+    img = img / 255.0
+    augmented_img = (np.array(transformation([img])) * 255).astype(np.uint8)
+    return augmented_img
 
 def _get_embeddings(encoder, dataset, transformation, img_processor, target_dim, device):
     embeddings = []
     all_labels = []
     for batch_images, labels in tqdm(dataset):
         if transformation:
-                batch_images = _apply_transform(batch_images, transformation)
+                batch_images =  [_apply_transform(image, transformation) for image in batch_images]
         batch_images = img_processor(batch_images, return_tensors="pt")["pixel_values"].to(device)
         batch_emb = get_features(encoder, batch_images, target_dim, device)
         embeddings.append(batch_emb)
@@ -134,7 +135,7 @@ def evaluate_retrieval(encoder_name: str,
     json.dump(checkpoint, open(checkpoint_file, 'w'), ensure_ascii=True, indent=4)
 
 def _test_retreival_pipeline():
-    encoder_name = "microsoft/resnet-50"
+    encoder_name = "custom/byol-resnet50"
     dataset_name = "gpr1200"
     transformation_obj = [{
             "id": "motionblur",
