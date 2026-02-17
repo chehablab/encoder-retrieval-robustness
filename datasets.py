@@ -33,7 +33,7 @@ class GPR1200(Dataset):
     
     def __getitem__(self, index):
         image_path = os.path.join(self.image_folder, self.data[index][0])
-        image = Image.open(image_path).convert("RGB").resize((256 , 256))
+        image = Image.open(image_path).convert("RGB").resize((225 , 225))
         label = self.data[index][1]
         
         if self.processor:
