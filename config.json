@@ -15,9 +15,9 @@
         {
             "id": "jigsaw",
             "nb_rows_min": 2,
-            "nb_rows_max": 2,
+            "nb_rows_max": 3,
             "nb_cols_min": 2,
-            "nb_cols_max": 2,
+            "nb_cols_max": 3,
             "max_steps_min": 10,
             "max_steps_max": 10,
             "active": true
@@ -42,12 +42,6 @@
             "size_percent_min": 0.09,
             "size_percent_max": 0.1,
             "per_channel": false,
-            "active": true
-        },
-        {
-            "id": "multiplyhue",
-            "hue_min": 0.08,
-            "hue_max": 0.1,
             "active": true
         },
         {
