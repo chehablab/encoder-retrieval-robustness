@@ -25,7 +25,6 @@ def mean_average_precision_self(embeddings, labels, k):
         q = q.reshape(1, -1)
         
         _, neighbors = index.search(q, k)
-        print(len(neighbors[0]))
         neighbors = neighbors[0, 1:]
         total_relevant = np.sum(labels == labels[i])
         normalizer = min(total_relevant, k)
@@ -47,37 +46,37 @@ def mean_average_precision_self(embeddings, labels, k):
     return np.mean(average_precision)
 
 def mean_average_precision(queries, q_labels, embeddings, labels, k):
+    queries = queries.astype(np.float32)
+    embeddings = embeddings.astype(np.float32)
+
     faiss.normalize_L2(queries)
     faiss.normalize_L2(embeddings)
+
     index = faiss.IndexFlatIP(embeddings.shape[1])
     index.add(embeddings)
-    average_precision = []
 
-    for i, q in enumerate(queries):
-        q = q.reshape(1, -1)
+    _, neighbors = index.search(queries, k)
 
-        _, neighbors = index.search(q, k)
-        neighbors = neighbors[0]
+    retrieved_labels = labels[neighbors]
 
-        total_relevant = np.sum(labels == q_labels[i])
-        normalizer = min(total_relevant, k)
+    matches = (retrieved_labels == q_labels[:, None])  # R(k)
 
-        ap = 0.0
-        rel = 0
+    # P(k) = num of matches / rank
+    cumulative_matches = np.cumsum(matches, axis=1) # number of matches per rank
 
-        for rank, idx in enumerate(neighbors):
-            if labels[idx] == q_labels[i]:
-                rel += 1
-                ap += rel / (rank + 1)
+    ranks = np.arange(1, k + 1)
+    precision_at_k = cumulative_matches / ranks # P(k) - percision at every rank
 
-        if rel > 0:
-            ap /= normalizer
-        else:
-            ap = 0.0
+    precision_at_k *= matches #P(k)*R(K) - only relevant precision is kept
 
-        average_precision.append(ap)
-    return np.mean(average_precision)
+    total_relevant = np.sum(labels[:, None] == q_labels[None, :], axis=0)
+    normalizer = np.minimum(total_relevant, k)
 
+    normalizer = np.where(normalizer == 0, 1, normalizer) # (1/rd)
+
+    AP = np.sum(precision_at_k, axis=1) / normalizer  # (1/rd)*sum(P(k)*(R(k)))
+
+    return np.mean(AP) #mAP
 
 def _test_mean_average_precision():
     embeddings = np.array([
