@@ -37,7 +37,7 @@ def _get_embeddings(encoder, dataset, transformation, img_processor, target_dim,
     all_labels = []
     for batch_images, labels in tqdm(dataset):
         if transformation:
-                batch_images =  [_apply_transform(image, transformation) for image in batch_images]
+                batch_images =  [_apply_transform(image, transformation).squeeze() for image in batch_images]
         batch_images = img_processor(batch_images, return_tensors="pt")["pixel_values"].to(device)
         batch_emb = get_features(encoder, batch_images, target_dim, device)
         embeddings.append(batch_emb)
@@ -66,7 +66,7 @@ def evaluate_retrieval(encoder_name: str,
         
     checkpoint_file = os.path.join(checkpoint_folder, checkpoint_name+".json")
     if _is_already_evaluated(checkpoint_file, encoder_name, dataset_name, transformation_name):
-        print(f"{encoder_name} already evaluated on {dataset_name}. Skipping evaluation")
+        print(f"{encoder_name} already evaluated on {dataset_name} and {transformation_name}. Skipping evaluation")
         return
 
     encoder, img_processor = get_encoder(encoder_name, device=device)
@@ -132,7 +132,7 @@ def evaluate_retrieval(encoder_name: str,
     json.dump(checkpoint, open(checkpoint_file, 'w'), ensure_ascii=True, indent=4)
 
 def _test_retreival_pipeline():
-    encoder_name = "custom/byol-resnet50"
+    encoder_name = "microsoft/resnet-50"
     dataset_name = "gpr1200"
     transformation_obj = {
             "id": "motionblur",
@@ -143,3 +143,4 @@ def _test_retreival_pipeline():
     transformation = get_transformation(transformation_obj)
     transformation_name = transformation_obj['id']
     evaluate_retrieval(encoder_name, dataset_name, 2048, transformation, transformation_name, [RetrievalMetrics.MEAN_AVERAGE_PRECISION],[10], batch_size=256)
+_test_retreival_pipeline()
