@@ -143,4 +143,3 @@ def _test_retreival_pipeline():
     transformation = get_transformation(transformation_obj)
     transformation_name = transformation_obj['id']
     evaluate_retrieval(encoder_name, dataset_name, 2048, transformation, transformation_name, [RetrievalMetrics.MEAN_AVERAGE_PRECISION],[10], batch_size=256)
-_test_retreival_pipeline()
